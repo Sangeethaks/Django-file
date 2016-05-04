@@ -1,0 +1,191 @@
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from myapp.models import Document
+from myapp.forms import DocumentForm
+
+import sys, zipfile, os, os.path
+import re
+from zipfile import ZipFile, ZIP_DEFLATED  
+
+
+
+def list(request):
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        #if form.is_valid():
+        	
+        newdoc = Document(docfile = request.FILES['docfile'])
+        newdoc.save()
+        unzipped = zipfile.ZipFile(request.FILES['docfile'])
+        print(unzipped.namelist())
+        BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+        file_path = os.path.join(BASE_DIR,'uploaded_files/documents')
+        arc = ZipFile(file_path,'r',ZIP_DEFLATED)
+        for name in unzipped.namelist():
+        	print ("Extracting %s" % name)
+        	if name.endswith('.zip'):
+				try:
+					tt = os.mkdir(os.path.join(file_path,name))
+					temp =open(tt,'wb')
+					data = arc.read(name)
+					temp.write(data)
+					temp.close()
+				except err:
+					message = ("Please upload only zip files")
+					raise Exception(message)
+        return HttpResponseRedirect(reverse('myapp.views.list'))
+    else:
+        form = DocumentForm() 
+    documents = Document.objects.all()
+    return render_to_response(
+        'myapp/list.html',
+        {'documents': documents, 'form': form},
+        context_instance=RequestContext(request)
+    )
+
+
+
+'''
+1
+def list(request):
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+
+            newdoc = Document(docfile = request.FILES['docfile'])
+            #docfile = request.FILES['docfile']
+            newdoc.save()
+            unzipped = zipfile.ZipFile(request.FILES['docfile'])
+            print(unzipped.namelist())
+            for i in unzipped.namelist():
+
+            	filecontent = file(i,'wb').write(unzipped.read(i))
+            return HttpResponseRedirect(reverse('myapp.views.list'))
+    else:
+        form = DocumentForm() 
+    documents = Document.objects.all()
+
+    return render_to_response(
+        'myapp/list.html',
+        {'documents': documents, 'form': form},
+        context_instance=RequestContext(request)
+    )
+
+
+'''
+
+
+
+
+
+'''
+
+@receiver(post_save, sender = Document)
+def list(sender,instance,**kwargs):
+	if request.method == 'POST':
+		form = DocumentForm(request.POST, request.FILES)
+		if form.is_valid():
+		#if form.endswith == ".zip":
+			newdoc = Document(docfile = request.FILES['docfile'])
+			newdoc.save()
+			BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+			file_path = os.path.join(BASE_DIR,'uploaded_files/documents/%Y-%m-%d')
+			target_basename = os.path.basename(path[:-len(".zip")])
+			target_path = os.path.join(file_path, target_basename)
+			#path= kwargs['path']
+			#thefile = kwargs['docfile']
+			z= zipfile.ZipFile(docfile)
+			unz = unzip.extractall(re.search('[^\s]+(?=\.zip)', file_path).group(0))
+			#unzip_path = z.extractall(dir)
+		for name in z.namelist():
+			if name.endswith('/'):
+				try:
+					os.mkdir(os.path.join(file_path,name))
+				except err:
+					message = ("Could not open a zip file:%s\n" %(file_path,err))
+					raise Exception(message)
+			else:
+				outfile =open(os.path.join(file_path,name),'wb')
+				outfile.write(zfobj.read(name))
+				outfile.close()
+
+			return HttpResponseRedirect(reverse('myapp.views.list'))
+	else:
+		form = DocumentForm() 
+	documents = Document.objects.all()
+	return render_to_response('myapp/list.html',{'documents': documents, 'form': form},context_instance=RequestContext(request))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def list(request):
+	if request.method == 'POST':
+		form = DocumentForm(request.POST, request.FILES)
+		if form.is_valid():
+			newdoc = Document(docfile = request.FILES['docfile'])
+			newdoc.save()
+
+			
+			BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+			dir = os.path.join(BASE_DIR,'uploaded_files/documents/%Y-%m-%d')
+			z= zipfile.ZipFile(docfile)
+			#unzip_path = z.extractall(dir)
+		for name in z.namelist():
+			if name.endswith('/'):
+				try:
+					os.mkdir(os.path.join(dir,name))
+				except:
+					pass
+			else:
+				outfile =open(os.path.join(dir,name),'wb')
+				outfile.write(zfobj.read(name))
+				outfile.close()
+
+			return HttpResponseRedirect(reverse('myapp.views.list'))
+	else:
+		form = DocumentForm() 
+	documents = Document.objects.all()
+	return render_to_response('myapp/list.html',{'documents': documents, 'form': form},context_instance=RequestContext(request))
+
+
+'''
